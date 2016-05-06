@@ -11,7 +11,6 @@ try {
     //secrets.js will not exist on the server since files are pushed via git, no problem here
 }
 var utils = require("./utils.js");
-//TODO
 var ipaddr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 var port = process.env.OPENSHIFT_NODEJS_PORT || 80;
 var mongodbURL = process.env.OPENSHIFT_MONGODB_DB_URL || secrets.mongoDbUrl;

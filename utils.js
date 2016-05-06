@@ -8,6 +8,8 @@ try {
 } catch (e) {
 
 }
+
+var riotApiKey = process.env.RIOT_API_KEY || secrets.riotApiKey;
 var ddragonVersion;
 
 module.exports = {
@@ -66,7 +68,7 @@ module.exports = {
                 return "http://ddragon.leagueoflegends.com/cdn/" + ddragonVersion + "/" + (path || "");
             }
         };
-        module.exports.requestJSON("https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=" + secrets.riotApiKey, function (versions) {
+        module.exports.requestJSON("https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=" + riotApiKey, function (versions) {
             ddragonVersion = versions[0];
             console.log("Setup DDragon");
             callback(module.exports);
