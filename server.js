@@ -477,7 +477,7 @@ function verifyUser(req, res) {
             if (!err) {
                 if (doc) {
                     var region = regions[doc.region];
-                    utils.requestJSON(region.host + "/api/lol/" + region.region + "/v1.4/summoner/" + doc.summonerId + "/masteries?api_key=" + secrets.riotApiKey, function (apiResponse) {
+                    utils.requestJSON(region.host + "/api/lol/" + region.region + "/v1.4/summoner/" + doc.summonerId + "/masteries?api_key=" + apiKey, function (apiResponse) {
                         var pages = apiResponse[Object.keys(apiResponse)[0]].pages;
                         for (var i = 0; i < pages.length; i++) {
                             var page = pages[i];
