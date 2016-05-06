@@ -1,0 +1,117 @@
+#championModal-loading {
+    text-align: center;
+    font-size: 30px;
+}
+
+#spinner{
+    animation: spin 2s infinite linear;
+    font-size: 60px;
+}
+
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+
+#content {
+    margin-bottom: 20px;
+}
+
+#wrapper {
+    background-color: white;
+    box-shadow: 0 0 20px black;
+}
+
+#championSelect {
+    margin-bottom: 30px;
+}
+
+.championButton {
+    color: rgb(46,49,146);
+    text-align: center;
+    font-size: 13px;
+    width: 90px;
+    height: 95px;
+    padding: 5px;
+}
+
+.championButton:hover {
+    background-color:  rgb(220,220,220);
+}
+
+.championName {
+    width: 100%;
+}
+a {
+    color: rgb(46,49,146);
+}
+body {
+    background-color: rgb(0,169,157);
+}
+
+.quote {
+    font-size: 20px;
+}
+
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+}
+
+footer {
+    margin-top: 50px;
+    margin-bottom: 40px;
+    color: white;
+}
+
+footer p {
+    margin-bottom: 7px;
+}
+
+#alerts {
+    padding-bottom: 10px;
+}
+
+.alert {
+    margin: 3px;
+    padding: 8px;
+    background-color: rgb(41,171,226);
+}
+
+.clickable {    
+    cursor: pointer;
+}
+
+#loginModal-summoner {
+    width: 85%;
+}
+
+#loginModal-region {
+    width: 15%;
+}
+
+#loginModal-verificationCode {
+    font-size: 30px;
+    text-align: center;
+}
+
+#loginModal-status1 {
+    color: red;
+}
+
+.seriesIcon {
+    font-size: 18px;
+    text-align: center;
+}
+
+#easterEgg {
+    z-index: 15;
+    position: fixed;
+    left: 50%;
+    margin-left: -120px;
+    top: 50%;
+    margin-top: -120px;
+}

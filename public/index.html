@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>League of Quotes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="./icon.png">
+        <script src="//code.jquery.com/jquery-2.2.3.min.js"></script>
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="//code.highcharts.com/highcharts.js"></script>
+        <script src="script.js"></script>
+        <link href="styles.css" rel="stylesheet">
+    </head>
+    <body class="col-md-12">
+
+        <div id="alerts" class="row col-md-10 col-md-offset-1">
+            <p id="alert-login" class="alert clickable" data-toggle="modal" data-target="#loginModal">
+                You haven't verified a League of Legends account. You can still take quizzes, but results will not be recorded. Click here to verify your account
+            </p>
+            <p id="alert-logout" class="alert clickable">
+                You are currently logged in as <span class="userInfo">[LOADING...]</span>. Click here to log out
+            </p>
+            <p id="alert-bullshit" class="alert clickable">
+                The data being displayed is not accurate. It is randomly generated for illustrative purposes. Click here to switch to real data
+            </p>
+        </div>
+
+        <div id="wrapper" class="row col-md-10 col-md-offset-1">
+            <div>
+                <a href="./">
+                    <img id="logo" class="center-block" src="logo.png">
+                </a>
+            </div>
+
+            <div id="info">
+               League of Quotes let's you test your knowledge of champions' quotes through quizzes. For each quiz you will be presented with a number of quotes the champion says and you need to determine what triggers the quote. Once you submit the quiz you can see which questions you got wrong and their correct answers.
+               <br>
+               You can also see how well other players know champions based on their champion mastery points. If you connect your League of Legends account before starting a quiz, your results will be added to this data
+            </div>
+            
+            
+            <div id="content" class="col-md-12">          
+            </div>
+
+            <div id="championModal" class="modal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title championModal-championName"></h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <div id="championModal-loading" class="text-center">
+                                <span id="spinner" class="glyphicon glyphicon-refresh"></span>
+                                <br>
+                                Loading
+                            </div>
+                            <div id="championModal-content">
+                                There are <b class="championModal-questionCount"></b> questions you can answer for <span class="championModal-championName"></span>'s quiz. You can take as many or as few as you want
+                                <br>
+                                <div class="input-group col-md-7">
+                                    <span class="input-group-addon">Quiz length</span>
+                                    <input id="championModal-quizLength" type="number" class="form-control" min="1">
+                                    <span class="input-group-btn">
+                                        <button id="startQuiz" class="btn" type="button" data-dismiss="modal">Start</button>
+                                    </span>
+                                </div>
+                                Note that results will only be saved for the first quiz you submit for each champion (regardless of quiz length)
+                                <hr>
+                                <br>
+                                Wondering how well other people know  <span class="championModal-championName"></span>'s quotes? You can view stats for each quote broken down by champion mastery score
+                                <br>
+                                <button id="viewStats" class="btn" data-dismiss="modal">View stats</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loginModal" class="modal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Login</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="loginModal-loading" class="text-center">
+                                <span id="spinner" class="glyphicon glyphicon-refresh"></span>
+                                <br>
+                                Loading
+                            </div>
+                            <div id="loginModal-step1">
+                                In order to confirm that you own your account, you will need to change the name of a mastery page. To get started, enter your summoner name (what other players see in game) and your region
+
+                                <div class="input-group">
+                                    <input type="text" id="loginModal-summoner" class="form-control">
+
+                                    <select id="loginModal-region" class="selectpicker form-control"></select>
+                                    <span class="input-group-btn">
+                                        <button id="getCode" class="btn" type="button" >Get code</button>
+                                    </span>
+                                </div>
+                                <p id="loginModal-status1"></p>
+                            </div>
+                            <div id="loginModal-step2">
+                                Please set the name of a mastery page to the code below then press the button below
+                                <p id="loginModal-verificationCode"></p>                            
+                                <button id="verifyCode" class="btn">Verify code</button>
+                                <p id="loginModal-status2"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="col-md-10 col-md-offset-1">
+            <p>Created by Derpthemeus (Matt Oslan) and Skye3 for the <a href="https://developer.riotgames.com/discussion/announcements/show/eoq3tZd1">Riot Games 2016 API Challenge</a></p>
+            <p>Found a bug or have feedback? <a href="https://www.reddit.com/message/compose/?to=Derpthemeus&subject=League%20of%20Quotes">Message me on Reddit</a></p>
+            <p>Not enough data to preview what graphs look like? <a id="useBullshitData" class="clickable">Click here to use fake data</a></p>
+            <p>If you like the site feel free (but not obligated) to <a href="https://www.paypal.me/MOslan">make a donation</a>. It helps cover server costs and encourages me to do more work.</p>
+            <p>League of Quotes isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.</p>
+        </footer>
+    </body>
+</html>
