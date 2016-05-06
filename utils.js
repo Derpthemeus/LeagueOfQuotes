@@ -2,7 +2,12 @@
 
 var http = require("http");
 var https = require("https");
-var secrets = require("./secrets.js");
+var secrets;
+try {
+    secrets = require("./secrets.js");
+} catch (e) {
+
+}
 var ddragonVersion;
 
 module.exports = {

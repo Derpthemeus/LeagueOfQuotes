@@ -4,7 +4,12 @@ var mongodb = require("mongodb");
 var fs = require("fs");
 var Promise = require("promise");
 //secrets.js contains authorization/login details and is not included in the repository. Check out 'secrets-EXAMPLE.js' for more info
-var secrets = require("./secrets.js");
+var secrets;
+try {
+    secrets = require("./secrets.js");
+} catch (e) {
+    //secrets.js will not exist on the server since files are pushed via git, no problem here
+}
 var utils = require("./utils.js");
 //TODO
 var ipaddr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";

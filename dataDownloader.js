@@ -1,7 +1,6 @@
 //the site depends a lot of external data sources. To cut back on startup times and prevent errors caused by 
 //bad (misformatted or incorrect) data, data is cached and can be manually validated before being used
 
-var secrets = require("./secrets.js");
 var utils = require("./utils.js");
 var cheerio = require("cheerio");
 var fs = require("fs");
