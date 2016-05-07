@@ -234,7 +234,7 @@ function setupQuestions(championId, questionCount, championName) {
         quizId = quizData.quizId;
         var quiz = document.createElement("div");
         quiz.className = "col-sm-12";
-        if (championId === 33) {
+        if (championId === "33") {
             var easterEgg = document.createElement("div");
             easterEgg.id = "easterEgg";
             var img = document.createElement("img");
@@ -329,7 +329,7 @@ function setupQuestions(championId, questionCount, championName) {
                     resultsDiv.className = "resultsDiv col-sm-12 clickable well well-md center-block";
                     resultsDiv.appendChild(document.createTextNode("You got " + correct + "/" + answers.length + " questions correct. Click here to see how others did"));
                     resultsDiv.onclick = function () {
-                        showStats(championId);
+                        showStats(championId, championName);
                     };
                     quiz.appendChild(resultsDiv);
                 } else {
