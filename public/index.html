@@ -12,9 +12,9 @@
         <script src="script.js"></script>
         <link href="styles.css" rel="stylesheet">
     </head>
-    <body class="col-md-12">
+    <body class="col-sm-12">
 
-        <div id="alerts" class="row col-md-10 col-md-offset-1">
+        <div id="alerts" class="row col-sm-10 col-sm-offset-1">
             <p id="alert-login" class="alert clickable" data-toggle="modal" data-target="#loginModal">
                 You haven't verified a League of Legends account. You can still take quizzes, but results will not be recorded. Click here to verify your account
             </p>
@@ -26,21 +26,21 @@
             </p>
         </div>
 
-        <div id="wrapper" class="row col-md-10 col-md-offset-1">
+        <div id="wrapper" class="row col-sm-10 col-sm-offset-1">
             <div>
                 <a href="./">
                     <img id="logo" class="center-block" src="logo.png">
                 </a>
             </div>
 
-            <div id="info">
-               League of Quotes let's you test your knowledge of champions' quotes through quizzes. For each quiz you will be presented with a number of quotes the champion says and you need to determine what triggers the quote. Once you submit the quiz you can see which questions you got wrong and their correct answers.
-               <br>
-               You can also see how well other players know champions based on their champion mastery points. If you connect your League of Legends account before starting a quiz, your results will be added to this data
+            <div id="info" class="col-sm-10 col-sm-offset-1">
+                League of Quotes let's you test your knowledge of champions' quotes through quizzes. For each quiz you will be presented with a number of quotes the champion says and you need to determine what triggers the quote. Once you submit the quiz you can see which questions you got wrong and their correct answers.
+                <br>
+                You can also see how well other players know champions based on their champion mastery points. If you connect your League of Legends account before starting a quiz, your results will be added to this data
             </div>
-            
-            
-            <div id="content" class="col-md-12">          
+
+
+            <div id="content" class="col-sm-12">          
             </div>
 
             <div id="championModal" class="modal">
@@ -60,7 +60,7 @@
                             <div id="championModal-content">
                                 There are <b class="championModal-questionCount"></b> questions you can answer for <span class="championModal-championName"></span>'s quiz. You can take as many or as few as you want
                                 <br>
-                                <div class="input-group col-md-7">
+                                <div class="input-group col-sm-7">
                                     <span class="input-group-addon">Quiz length</span>
                                     <input id="championModal-quizLength" type="number" class="form-control" min="1">
                                     <span class="input-group-btn">
@@ -118,8 +118,9 @@
 
 
         </div>
-        <footer class="col-md-10 col-md-offset-1">
+        <footer class="col-sm-10 col-sm-offset-1">
             <p>Created by Derpthemeus (Matt Oslan) and Skye3 for the <a href="https://developer.riotgames.com/discussion/announcements/show/eoq3tZd1">Riot Games 2016 API Challenge</a></p>
+            <p><a href="https://github.com/Derpthemeus/LeagueOfQuotes">View source on GitHub</a></p>
             <p>Found a bug or have feedback? <a href="https://www.reddit.com/message/compose/?to=Derpthemeus&subject=League%20of%20Quotes">Message me on Reddit</a></p>
             <p>Not enough data to preview what graphs look like? <a id="useBullshitData" class="clickable">Click here to use fake data</a></p>
             <p>If you like the site feel free (but not obligated) to <a href="https://www.paypal.me/MOslan">make a donation</a>. It helps cover server costs and encourages me to do more work.</p>

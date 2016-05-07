@@ -1,7 +1,6 @@
 var quizId, userId, ddragonUrl;
 //generates fake data instead of using actual quiz results. Good for previewing the site before a lot of data is collected
-//TODO default to false
-var useBullshitData = true;
+var useBullshitData = false;
 window.addEventListener("load", function () {
 
     requestJSON("./getRegions", function (regions) {
@@ -18,6 +17,7 @@ window.addEventListener("load", function () {
         var championId = event.relatedTarget.dataset.championId;
         var championName = event.relatedTarget.dataset.championName;
         modal.data("championId", championId);
+        modal.data("championName", championName);
         modal.find("#championModal-loading").css("display", "block");
         modal.find("#championModal-content").css("display", "none");
         modal.find(".championModal-championName").text(championName);
@@ -33,11 +33,13 @@ window.addEventListener("load", function () {
     });
     $("#startQuiz").on("click", function () {
         var championId = $("#championModal").data("championId");
-        setupQuestions(championId, document.getElementById("championModal-quizLength").value);
+        var championName = $("#championModal").data("championName");
+        setupQuestions(championId, document.getElementById("championModal-quizLength").value, championName);
     });
     $("#viewStats").on("click", function () {
         var championId = $("#championModal").data("championId");
-        showStats(championId);
+        var championName = $("#championModal").data("championName");
+        showStats(championId, championName);
     });
     $("#getCode").on("click", function () {
         var name = document.getElementById("loginModal-summoner").value;
@@ -133,7 +135,7 @@ function setupHome() {
         championSelection.appendChild(header);
         var championList = document.createElement("ul");
         var div = document.createElement("div");
-        div.className = "row col-md-10 col-md-offset-1";
+        div.className = "row col-sm-10 col-sm-offset-1";
         div.appendChild(championList);
         championList.id = "championList";
         championList.className = "list-inline";
@@ -226,12 +228,12 @@ function logout() {
 }
 
 
-function setupQuestions(championId, questionCount) {
+function setupQuestions(championId, questionCount, championName) {
     requestJSON("./startQuiz?championId=" + championId + "&questionCount=" + questionCount + (userId ? "&userId=" + userId : ""), function (quizData) {
         var triggers = quizData.triggers;
         quizId = quizData.quizId;
         var quiz = document.createElement("div");
-        quiz.className = "col-md-12";
+        quiz.className = "col-sm-12";
         if (championId === 33) {
             var easterEgg = document.createElement("div");
             easterEgg.id = "easterEgg";
@@ -241,10 +243,15 @@ function setupQuestions(championId, questionCount) {
             quiz.appendChild(easterEgg);
         }
 
+        var title = document.createElement("div");
+        title.id = "pageTitle";
+        title.appendChild(document.createTextNode(championName));
+        quiz.appendChild(title);
+
 
         quizData.questions.forEach(function (quote) {
             var questionDiv = document.createElement("div");
-            questionDiv.className = "col-md-12 well well-sm";
+            questionDiv.className = "col-sm-12 well well-sm";
             var audio = document.createElement("audio");
             audio.src = quote.file;
             audio.addEventListener("ended", function () {
@@ -252,7 +259,7 @@ function setupQuestions(championId, questionCount) {
             });
             questionDiv.appendChild(audio);
             var play = document.createElement("button");
-            play.className = "col-md-1 btn btn-sm";
+            play.className = "col-sm-1 btn btn-sm";
             var icon = document.createElement("span");
             icon.className = "glyphicon glyphicon-play";
             play.onclick = function () {
@@ -268,7 +275,7 @@ function setupQuestions(championId, questionCount) {
             play.appendChild(icon);
             questionDiv.appendChild(play);
             var text = document.createElement("div");
-            text.className = "quote col-md-6";
+            text.className = "quote col-sm-6";
             var split = quote.text.split("\n");
             split.forEach(function (line, index) {
                 text.appendChild(document.createTextNode(line));
@@ -278,7 +285,7 @@ function setupQuestions(championId, questionCount) {
             });
             questionDiv.appendChild(text);
             var selectDiv = document.createElement("div");
-            selectDiv.className = "col-md-5 quoteAnswer";
+            selectDiv.className = "col-sm-5 quoteAnswer";
             var select = document.createElement("select");
             var defaultOption = document.createElement("option");
             defaultOption.value = -1;
@@ -294,7 +301,7 @@ function setupQuestions(championId, questionCount) {
             quiz.appendChild(questionDiv);
         });
         var submit = document.createElement("button");
-        submit.className = "btn col-md-12";
+        submit.className = "btn col-sm-12";
         submit.appendChild(document.createTextNode("Submit"));
         submit.onclick = function () {
             quiz.removeChild(submit);
@@ -305,14 +312,26 @@ function setupQuestions(championId, questionCount) {
             requestJSON("./answerQuiz?quizId=" + quizId + "&answers=" + encodeURIComponent(JSON.stringify(given)), function (response) {
                 if (!response.error) {
                     var answers = response.answers;
+                    var correct = 0;
                     $(".quoteAnswer").each(function (index) {
                         var answerDiv = document.createElement("div");
-                        answerDiv.className = "col-md-5 " + (given[index] === answers[index] ? "correct" : "incorrect");
+                        var isCorrect = given[index] === answers[index];
+                        if (isCorrect) {
+                            correct++;
+                        }
+                        answerDiv.className = "col-sm-5 " + (isCorrect ? "correct" : "incorrect");
                         answerDiv.appendChild(document.createTextNode("You said: " + (triggers[given[index]] || "")));
                         answerDiv.appendChild(document.createElement("br"));
                         answerDiv.appendChild(document.createTextNode("Correct answer: " + triggers[answers[index]]));
                         $(this).replaceWith(answerDiv);
                     });
+                    var resultsDiv = document.createElement("div");
+                    resultsDiv.className = "resultsDiv col-sm-12 clickable well well-md center-block";
+                    resultsDiv.appendChild(document.createTextNode("You got " + correct + "/" + answers.length + " questions correct. Click here to see how others did"));
+                    resultsDiv.onclick = function () {
+                        showStats(championId);
+                    };
+                    quiz.appendChild(resultsDiv);
                 } else {
                     alert("Error submitting quiz/getting answers: " + response.error);
                 }
@@ -334,62 +353,46 @@ function error(msg, code) {
     alert("Error occured: " + msg + " (" + code + ")");
 }
 
-function showStats(championId) {
+function showStats(championId, championName) {
     getStats(championId, function (data) {
         var statsDiv = document.createElement("div");
-        statsDiv.className = "col-md-12";
+        statsDiv.className = "col-sm-12";
+
+        var title = document.createElement("div");
+        title.id = "pageTitle";
+        title.appendChild(document.createTextNode(championName));
+        statsDiv.appendChild(title);
+
+
         var chartDiv = document.createElement("div");
         chartDiv.id = "chart";
         chartDiv.className = "row center-block";
         statsDiv.appendChild(chartDiv);
-        statsDiv.appendChild(document.createElement("hr"));
         var options = {
-            chart: {
-                backgroundColor: "#FFFFFF"
-            },
             title: {
-                text: "% Correct by Mastery Points",
-                style: {
-                    color: "#33C3AF"
-                }
+                text: "% Correct by Mastery Points"
             },
             credits: {
                 enabled: false
             },
             xAxis: {
-                //lineColor: "#33C3AF",
                 labels: {
-                    style: {
-                        color: "#33C3AF"
-                    }
                 },
                 title: {
-                    text: "Champion Mastery Points",
-                    style: {
-                        color: "#33C3AF"
-                    }
+                    text: "Champion Mastery Points"
                 },
                 categories: []
             },
             yAxis: {
                 min: 0,
                 max: 100,
-                labels: {
-                    style: {
-                        color: "#33C3AF"
-                    }
-                },
                 title: {
-                    text: "% Correct",
-                    style: {
-                        color: "#33C3AF"
-                    }
+                    text: "% Correct"
                 },
                 plotLines: [
                     {
                         value: 0,
-                        width: 1,
-                        color: "#808080"
+                        width: 1
                     }
                 ]
             },
@@ -398,19 +401,20 @@ function showStats(championId) {
             },
             tooltip: {
                 formatter: function () {
-                    var range = shortenNumber(data.groups[this.point.x - 1] || 0) + (this.point.x === data.groups.length - 1 ? "+" : " - " + this.x);
-                    return "<b>" + this.series.name + "</b><br>Mastery points:" + range + "<br>Correct: " + this.y + "%";
+                    var range = abbrNumber(data.groups[this.point.x - 1] || 0) + (this.point.x === data.groups.length - 1 ? "+" : " - " + this.x);
+                    return "<b>" + this.series.name + "</b><br>Mastery points:" + range + "<br>Correct: " + roundPercentage(this.y) + "<br>Answered: " + this.series.options.answered[this.point.x] + "<br>Correct: " + this.series.options.correct[this.point.x];
                 }
             },
             series: []
         };
         data.groups.forEach(function (group) {
-            options.xAxis.categories.push(shortenNumber(group));
+            options.xAxis.categories.push(abbrNumber(group));
         });
 
-
+        var row = document.createElement("div");
+        row.className = "row col-sm-12";
         var showAll = document.createElement("button");
-        showAll.className = "col-md-1 btn btn-md";
+        showAll.className = "col-sm-2 btn btn-md";
         showAll.onclick = function () {
             $('.showHide').html("hide");
             var chart = $("#chart").highcharts();
@@ -421,10 +425,10 @@ function showStats(championId) {
             chart.redraw();
         };
         showAll.appendChild(document.createTextNode("Show all"));
-        statsDiv.appendChild(showAll);
+        row.appendChild(showAll);
 
         var hideAll = document.createElement("button");
-        hideAll.className = "col-md-1 btn btn-md";
+        hideAll.className = "col-sm-2 col-sm-offset-1 btn btn-md";
         hideAll.onclick = function () {
             $('.showHide').html("show");
             var chart = $("#chart").highcharts();
@@ -435,20 +439,22 @@ function showStats(championId) {
             chart.redraw();
         };
         hideAll.appendChild(document.createTextNode("Hide all"));
-        statsDiv.appendChild(hideAll);
-
+        row.appendChild(hideAll);
+        statsDiv.appendChild(row);
+        statsDiv.appendChild(document.createElement("br"));
+        statsDiv.appendChild(document.createElement("hr"));
         data.quotes.forEach(function (quote, index) {
             var quoteDiv = document.createElement("div");
-            quoteDiv.className = "col-md-12 well well-sm";
+            quoteDiv.className = "col-sm-12 well well-sm";
             var showHide = document.createElement("button");
-            showHide.className = "showHide col-md-1 btn btn-sm";
+            showHide.className = "showHide col-sm-1 btn btn-sm";
             showHide.onclick = function () {
                 toggleSeries(index);
             };
             showHide.appendChild(document.createTextNode("hide"));
             quoteDiv.appendChild(showHide);
             var seriesIcon = document.createElement("div");
-            seriesIcon.className = "seriesIcon col-md-1";
+            seriesIcon.className = "seriesIcon col-sm-1";
             quoteDiv.appendChild(seriesIcon);
             var audio = document.createElement("audio");
             audio.src = quote.file;
@@ -457,7 +463,7 @@ function showStats(championId) {
             });
             quoteDiv.appendChild(audio);
             var play = document.createElement("button");
-            play.className = "col-md-1 btn btn-sm";
+            play.className = "col-sm-1 btn btn-sm";
             var playIcon = document.createElement("span");
             playIcon.className = "glyphicon glyphicon-play";
             play.onclick = function () {
@@ -473,7 +479,7 @@ function showStats(championId) {
             play.appendChild(playIcon);
             quoteDiv.appendChild(play);
             var text = document.createElement("div");
-            text.className = "col-md-9 quote";
+            text.className = "col-sm-8 quote";
             var split = quote.quote.split("\n");
             split.forEach(function (line, index) {
                 text.appendChild(document.createTextNode(line));
@@ -481,17 +487,34 @@ function showStats(championId) {
                     text.appendChild(document.createElement("br"));
                 }
             });
+
+
+
+
             quoteDiv.appendChild(text);
             var series = {
                 name: quote.quote,
-                data: []
+                data: [],
+                totalAnswered: 0,
+                totalCorrect: 0,
+                answered: [],
+                correct: []
             };
             for (var i = 0; i < data.groups.length; i++) {
                 //groups without data will be undefined
                 var group = quote.groups[i] || {correct: 0, answered: 0};
                 series.data.push(group.correct / group.answered * 100);
+                series.totalAnswered += group.answered;
+                series.totalCorrect += group.correct;
+                series.answered.push(group.answered);
+                series.correct.push(group.correct);
             }
             options.series.push(series);
+
+            var percent = document.createElement("div");
+            percent.appendChild(document.createTextNode(roundPercentage(series.totalCorrect / series.totalAnswered * 100)));
+            quoteDiv.appendChild(percent);
+
             statsDiv.appendChild(quoteDiv);
         });
         $(chartDiv).highcharts(options);
@@ -552,7 +575,7 @@ function getStats(championId, callback) {
     });
 }
 
-function shortenNumber(num) {
+function abbrNumber(num) {
     if (num >= 1000000) {
         return (num / 1000000) + "m";
     } else if (num >= 1000) {
@@ -560,4 +583,9 @@ function shortenNumber(num) {
     } else {
         return num;
     }
+}
+
+function roundPercentage(num) {
+    //use 0% rather than NaN%
+    return ((Math.round(num * 100) / 100) || 0) + "%";
 }
