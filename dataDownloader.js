@@ -81,19 +81,20 @@ function setupQuotesData() {
         "Upon consuming a Health Potion": ["Poppy"], //none of the quotes have audio
         "Co-op vs. AI Responses": true,
         "Uncategorized": true, //Kalista has these, there may be others
+        "Champion-specific taunts": true, //Tahm Kench has these, there may be others
         "Unknown champion taunts": true, //Poppy has these, there may be others
         "West Altar": true, //Some champions (mosty from the Sahdow Isles) have special quotes when capturing altars on TT. Lots of players don't play this mode, so they can be skipped
         "East Altar": true,
-        "Upon buying Devourer": true //rip ghost dog
+        "Upon buying Devourer": true, //rip ghost dog
+        "Upon Starting a Game on...": ["Taliyah"] //map specific
     };
 
     function getTriggerName($) {
         //Aurelion Sol (possibly others) have references to other skins marked with "[S|L]" (which usually provide mouse-over previews of the skin)
         //2 different types of spaces are used in triggers, the regexes switch them all to normal spaces (0x20 UTF-8) and remove any double (or more) spaces
         return $.text().replace("[S|L]", "").trim().replace(/\xa0/g, " ").replace(/ {2,}/g, " ");
-
-
     }
+
     //different wiki pages are formatted differently and need to be parsed differently.
     //a parser is passed a cheerio object representing the page containing quotes and a string that is the champion's name
     var wikiParsers = {
@@ -165,7 +166,7 @@ function setupQuotesData() {
             //appended to the end of the champion's name to determine the page name (ex: Thresh/Background)
             pageName: "/Background"
         },
-        quotesH2: {
+        quotes: {
             parser: function ($, championName, isTabbed) {
                 var quoteData = {
                     quotes: {},
@@ -185,55 +186,8 @@ function setupQuotesData() {
                     if (element.is("h2")) {
                         parentTrigger = getTriggerName(element.find(".mw-headline"));
                         childTrigger = null;
-                    } else if (element.is("ul")) {
-                        var trigger = childTrigger ? parentTrigger + " " + childTrigger : parentTrigger;
-                        if (parentTrigger && !(blacklistedTriggers[trigger] && (typeof (blacklistedTriggers[trigger]) !== "object" || blacklistedTriggers[trigger].indexOf(championName) !== -1))) {
-                            //this check is needed for Kindred (possibly others)
-                            if (quoteData.triggers.indexOf(trigger) === -1) {
-                                quoteData.triggers.push(trigger);
-                            }
-                            var lis = element.children("li");
-                            lis.each(function () {
-                                var li = $(this);
-                                var button = li.find("button").first();
-                                var file = getFile(button);
-                                //make sure theres actually an audio file (not missing)
-                                if (file) {
-                                    var text = li.text().trim();
-                                    var quote = {
-                                        file: file,
-                                        text: text,
-                                        trigger: trigger
-                                    };
-                                    quoteData.quotes[getQuoteId(quote)] = quote;
-                                }
-                            });
-                        }
-                    } else if (element.is("h3")) {
-                        childTrigger = getTriggerName(element.find(".mw-headline").first());
-                    }
-                });
-                return quoteData;
-            },
-            //appended to the end of the champion's name to determine the page name (ex: Thresh/Background)
-            pageName: "/Quotes"
-        },
-        quotesDL: {
-            parser: function ($, championName, isTabbed) {
-                var quoteData = {
-                    quotes: {},
-                    triggers: []
-                };
-                var list;
-                if (isTabbed) {
-                    list = $(".tabber").children(".tabbertab").first().children();
-                } else {
-                    list = $("*");
-                }
-                var parentTrigger, childTrigger;
-                list.each(function () {
-                    var element = $(this);
-                    if (element.is("dl")) {
+
+                    } else if (element.is("dl")) {
                         if (element.children("dt").length !== 0) {
                             parentTrigger = getTriggerName(element.children("dt").first());
                             childTrigger = null;
@@ -265,11 +219,13 @@ function setupQuotesData() {
                                 }
                             });
                         }
+                    } else if (element.is("h3")) {
+                        childTrigger = getTriggerName(element.find(".mw-headline").first());
                     }
                 });
                 return quoteData;
             },
-            //appended to the end of the champion's name to determine the page name (ex: Thresh/Background)
+            //appended to the end of the champion's name to determine the page name (ex: Thresh/Quotes)
             pageName: "/Quotes"
         }
     };
@@ -297,50 +253,50 @@ function setupQuotesData() {
 
     //contains info for which parser will handle each champion's page
     var parserInfo = {
-        "Aatrox": {parser: wikiParsers.quotesH2, isTabbed: true},
-        "Ahri": {parser: wikiParsers.quotesH2, isTabbed: false},
-        "Akali": {parser: wikiParsers.quotesH2, isTabbed: false},
-        "Alistar": {parser: wikiParsers.quotesH2, isTabbed: false},
-        "Amumu": {parser: wikiParsers.quotesH2, isTabbed: true},
-        "Anivia": {parser: wikiParsers.quotesH2, isTabbed: true},
-        "Annie": {parser: wikiParsers.quotesH2, isTabbed: false},
-        "Ashe": {parser: wikiParsers.quotesH2, isTabbed: false},
-        "Aurelion Sol": {parser: wikiParsers.quotesH2, isTabbed: false},
-        "Azir": {parser: wikiParsers.background, isTabbed: true},
-        "Bard": {parser: wikiParsers.background, isTabbed: false},
-        "Blitzcrank": {parser: wikiParsers.background, isTabbed: false},
-        "Brand": {parser: wikiParsers.quotesDL, isTabbed: true},
-        "Braum": {parser: wikiParsers.background, isTabbed: false},
-        "Caitlyn": {parser: wikiParsers.background, isTabbed: false},
-        "Cassiopeia": {parser: wikiParsers.quotesDL, isTabbed: true},
-        "Cho'Gath": {parser: wikiParsers.background, isTabbed: true},
-        "Corki": {parser: wikiParsers.background, isTabbed: false},
-        "Darius": {parser: wikiParsers.background, isTabbed: true},
-        "Diana": {parser: wikiParsers.background, isTabbed: false},
-        "Dr. Mundo": {parser: wikiParsers.background, isTabbed: true},
-        "Draven": {parser: wikiParsers.background, isTabbed: true},
-        "Ekko": {parser: wikiParsers.background, isTabbed: false},
-        "Elise": {parser: wikiParsers.background, isTabbed: true},
-        "Evelynn": {parser: wikiParsers.background, isTabbed: false},
-        "Fiora": {parser: wikiParsers.background, isTabbed: true},
-        "Ezreal": {parser: wikiParsers.background, isTabbed: true},
+        "Aatrox": {parser: wikiParsers.quotes, isTabbed: true},
+        "Ahri": {parser: wikiParsers.quotes, isTabbed: false},
+        "Akali": {parser: wikiParsers.quotes, isTabbed: false},
+        "Alistar": {parser: wikiParsers.quotes, isTabbed: false},
+        "Amumu": {parser: wikiParsers.quotes, isTabbed: true},
+        "Anivia": {parser: wikiParsers.quotes, isTabbed: true},
+        "Annie": {parser: wikiParsers.quotes, isTabbed: false},
+        "Ashe": {parser: wikiParsers.quotes, isTabbed: false},
+        "Aurelion Sol": {parser: wikiParsers.quotes, isTabbed: false},
+        "Azir": {parser: wikiParsers.quotes, isTabbed: true},
+        "Bard": {parser: wikiParsers.quotes, isTabbed: false},
+        "Blitzcrank": {parser: wikiParsers.quotes, isTabbed: false},
+        "Brand": {parser: wikiParsers.quotes, isTabbed: true},
+        "Braum": {parser: wikiParsers.quotes, isTabbed: false},
+        "Caitlyn": {parser: wikiParsers.quotes, isTabbed: false},
+        "Cassiopeia": {parser: wikiParsers.quotes, isTabbed: false},
+        "Cho'Gath": {parser: wikiParsers.quotes, isTabbed: true},
+        "Corki": {parser: wikiParsers.quotes, isTabbed: false},
+        "Darius": {parser: wikiParsers.quotes, isTabbed: true},
+        "Diana": {parser: wikiParsers.quotes, isTabbed: false},
+        "Dr. Mundo": {parser: wikiParsers.quotes, isTabbed: true},
+        "Draven": {parser: wikiParsers.quotes, isTabbed: true},
+        "Ekko": {parser: wikiParsers.quotes, isTabbed: false},
+        "Elise": {parser: wikiParsers.quotes, isTabbed: true},
+        "Evelynn": {parser: wikiParsers.quotes, isTabbed: false},
+        "Fiora": {parser: wikiParsers.quotes, isTabbed: true},
+        "Ezreal": {parser: wikiParsers.quotes, isTabbed: true},
         "Fizz": {parser: wikiParsers.background, isTabbed: true},
-        "Fiddlesticks": {parser: wikiParsers.background, isTabbed: false},
+        "Fiddlesticks": {parser: wikiParsers.quotes, isTabbed: false},
         "Galio": {parser: wikiParsers.background, isTabbed: true},
         "Gangplank": {parser: wikiParsers.background, isTabbed: true},
         "Graves": {parser: wikiParsers.background, isTabbed: false},
-        "Garen": {parser: wikiParsers.background, isTabbed: false},
+        "Garen": {parser: wikiParsers.quotes, isTabbed: false},
         "Gnar": {parser: wikiParsers.background, isTabbed: false},
         "Gragas": {parser: wikiParsers.background, isTabbed: false},
         "Hecarim": {parser: wikiParsers.background, isTabbed: true},
         "Heimerdinger": {parser: wikiParsers.background, isTabbed: true},
-        "Illaoi": {parser: wikiParsers.quotesH2, isTabbed: true},
+        "Illaoi": {parser: wikiParsers.quotes, isTabbed: true},
         "Irelia": {parser: wikiParsers.background, isTabbed: false},
-        "Janna": {parser: wikiParsers.quotesH2, isTabbed: true},
+        "Janna": {parser: wikiParsers.quotes, isTabbed: true},
         "Jarvan IV": {parser: wikiParsers.background, isTabbed: false},
         "Jax": {parser: wikiParsers.background, isTabbed: false},
         "Jayce": {parser: wikiParsers.background, isTabbed: true},
-        "Jhin": {parser: wikiParsers.quotesH2, isTabbed: true},
+        "Jhin": {parser: wikiParsers.quotes, isTabbed: true},
         "Jinx": {parser: wikiParsers.background, isTabbed: false},
         "Kalista": {parser: wikiParsers.background, isTabbed: false},
         "Karma": {parser: wikiParsers.background, isTabbed: true},
@@ -360,13 +316,13 @@ function setupQuotesData() {
         "Lulu": {parser: wikiParsers.background, isTabbed: false},
         "Lux": {parser: wikiParsers.background, isTabbed: false},
         "Malphite": {parser: wikiParsers.background, isTabbed: true},
-        "Malzahar": {parser: wikiParsers.quotesDL, isTabbed: false},
+        "Malzahar": {parser: wikiParsers.quotes, isTabbed: false},
         "Maokai": {parser: wikiParsers.background, isTabbed: false},
         "Master Yi": {parser: wikiParsers.background, isTabbed: true},
         "Miss Fortune": {parser: wikiParsers.background, isTabbed: false},
         "Mordekaiser": {parser: wikiParsers.background, isTabbed: false},
         "Morgana": {parser: wikiParsers.background, isTabbed: false},
-        "Nami": {parser: wikiParsers.quotesH2, isTabbed: false},
+        "Nami": {parser: wikiParsers.quotes, isTabbed: false},
         "Nasus": {parser: wikiParsers.background, isTabbed: true},
         "Nautilus": {parser: wikiParsers.background, isTabbed: false},
         "Nidalee": {parser: wikiParsers.background, isTabbed: false},
@@ -384,24 +340,25 @@ function setupQuotesData() {
         "Rengar": {parser: wikiParsers.background, isTabbed: false},
         "Riven": {parser: wikiParsers.background, isTabbed: false},
         "Rumble": {parser: wikiParsers.background, isTabbed: true},
-        "Ryze": {parser: wikiParsers.background, isTabbed: false},
+        "Ryze": {parser: wikiParsers.quotes, isTabbed: false},
         "Sejuani": {parser: wikiParsers.background, isTabbed: true},
         "Shaco": {parser: wikiParsers.background, isTabbed: false},
-        "Shen": {parser: wikiParsers.quotesDL, isTabbed: false},
+        "Shen": {parser: wikiParsers.quotes, isTabbed: false},
         "Shyvana": {parser: wikiParsers.background, isTabbed: true},
         "Singed": {parser: wikiParsers.background, isTabbed: false},
         "Sion": {parser: wikiParsers.background, isTabbed: true},
         "Sivir": {parser: wikiParsers.background, isTabbed: true},
         "Skarner": {parser: wikiParsers.background, isTabbed: true},
-        "Sona": {parser: wikiParsers.quotesH2, isTabbed: true},
+        "Sona": {parser: wikiParsers.quotes, isTabbed: true},
         "Soraka": {parser: wikiParsers.background, isTabbed: true},
         "Swain": {parser: wikiParsers.background, isTabbed: false},
         "Syndra": {parser: wikiParsers.background, isTabbed: false},
         "Tahm Kench": {parser: wikiParsers.background, isTabbed: false},
+        "Taliyah": {parser: wikiParsers.quotes, isTabbed: true},
         "Talon": {parser: wikiParsers.background, isTabbed: false},
-        "Taric": {parser: wikiParsers.quotesDL, isTabbed: true},
+        "Taric": {parser: wikiParsers.quotes, isTabbed: false},
         "Teemo": {parser: wikiParsers.background, isTabbed: true},
-        "Thresh": {parser: wikiParsers.background, isTabbed: false},
+        "Thresh": {parser: wikiParsers.background, isTabbed: true},
         "Tristana": {parser: wikiParsers.background, isTabbed: true},
         "Trundle": {parser: wikiParsers.background, isTabbed: true},
         "Tryndamere": {parser: wikiParsers.background, isTabbed: true},
@@ -417,12 +374,12 @@ function setupQuotesData() {
         "Viktor": {parser: wikiParsers.background, isTabbed: false},
         "Vladimir": {parser: wikiParsers.background, isTabbed: true},
         "Volibear": {parser: wikiParsers.background, isTabbed: false},
-        "Warwick": {parser: wikiParsers.background, isTabbed: false},
+        "Warwick": {parser: wikiParsers.quotes, isTabbed: false},
         "Wukong": {parser: wikiParsers.background, isTabbed: true},
         "Xerath": {parser: wikiParsers.background, isTabbed: true},
         "Xin Zhao": {parser: wikiParsers.background, isTabbed: false},
         "Yasuo": {parser: wikiParsers.background, isTabbed: true},
-        "Yorick": {parser: wikiParsers.background, isTabbed: false},
+        "Yorick": {parser: wikiParsers.quotes, isTabbed: false},
         "Zac": {parser: wikiParsers.background, isTabbed: false},
         "Zed": {parser: wikiParsers.background, isTabbed: true},
         "Ziggs": {parser: wikiParsers.background, isTabbed: false},
